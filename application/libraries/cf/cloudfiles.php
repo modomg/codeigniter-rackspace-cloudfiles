@@ -1482,7 +1482,7 @@ class CF_Container
         }
         $objects = array();
         foreach ($obj_array as $obj) {
-            $tmp = new CF_Object($this, $obj["name"], False, False);
+            $tmp = new CF_Object($this, $obj["name"], False, True);
             $tmp->content_type = $obj["content_type"];
             $tmp->content_length = (float) $obj["bytes"];
             $tmp->set_etag($obj["hash"]);
