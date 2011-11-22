@@ -76,8 +76,9 @@ require("cloudfiles_http.php");
 define("DEFAULT_CF_API_VERSION", 1);
 define("MAX_CONTAINER_NAME_LEN", 256);
 define("MAX_OBJECT_NAME_LEN", 1024);
-define("MAX_OBJECT_SIZE", 5*1024*1024*1024+1); # bigger than S3! ;-)
-
+define("MAX_OBJECT_SIZE", 5*1024*1024*1024+1);
+define("US_AUTHURL", "https://auth.api.rackspacecloud.com");
+define("UK_AUTHURL", "https://lon.auth.api.rackspacecloud.com");
 /**
  * Class for handling Cloud Files Authentication, call it's {@link authenticate()}
  * method to obtain authorized service urls and an authentication token.
@@ -87,6 +88,14 @@ define("MAX_OBJECT_SIZE", 5*1024*1024*1024+1); # bigger than S3! ;-)
  * # Create the authentication instance
  * #
  * $auth = new CF_Authentication("username", "api_key");
+ *
+ * # NOTE: For UK Customers please specify your AuthURL Manually
+ * # There is a Predfined constant to use EX:
+ * #
+ * # $auth = new CF_Authentication("username, "api_key", NULL, UK_AUTHURL);
+ * # Using the UK_AUTHURL keyword will force the api to use the UK AuthUrl.
+ * # rather then the US one. The NULL Is passed for legacy purposes and must
+ * # be passed to function correctly.
  *
  * # NOTE: Some versions of cURL include an outdated certificate authority (CA)
  * #       file.  This API ships with a newer version obtained directly from
@@ -122,10 +131,10 @@ class CF_Authentication
      *
      * @param string $username Mosso username
      * @param string $api_key Mosso API Access Key
-     * @param string $account <b>Deprecated</b> <i>Account name</i>
-     * @param string $auth_host <b>Deprecated</b> <i>Authentication service URI</i>
+     * @param string $account  <i>Account name</i>
+     * @param string $auth_host  <i>Authentication service URI</i>
      */
-    function __construct($username=NULL, $api_key=NULL, $account=NULL, $auth_host=NULL)
+    function __construct($username=NULL, $api_key=NULL, $account=NULL, $auth_host=US_AUTHURL)
     {
 
         $this->dbug = False;
@@ -199,7 +208,7 @@ class CF_Authentication
         if ($status == 401) {
             throw new AuthenticationException("Invalid username or access key.");
         }
-        if ($status != 204) {
+        if ($status < 200 || $status > 299) {
             throw new InvalidResponseException(
                 "Unexpected response (".$status."): ".$reason);
         }
@@ -757,13 +766,14 @@ class CF_Connection
      * )
      * </code>
      *
+     * @param bool $enabled_only Will list all containers ever CDN enabled if     * set to false or only currently enabled CDN containers if set to true.      * Defaults to false.
      * @return array list of published Container names
      * @throws InvalidResponseException unexpected response
      */
-    function list_public_containers()
+    function list_public_containers($enabled_only=False)
     {
         list($status, $reason, $containers) =
-                $this->cfs_http->list_cdn_containers();
+                $this->cfs_http->list_cdn_containers($enabled_only);
         #if ($status == 401 && $this->_re_auth()) {
         #    return $this->list_public_containers();
         #}
@@ -913,6 +923,7 @@ class CF_Container
     public $bytes_used;
 
     public $cdn_enabled;
+    public $cdn_ssl_uri;
     public $cdn_uri;
     public $cdn_ttl;
     public $cdn_log_retention;
@@ -949,6 +960,7 @@ class CF_Container
         $this->bytes_used = $bytes;
         $this->cdn_enabled = NULL;
         $this->cdn_uri = NULL;
+        $this->cdn_ssl_uri = NULL;
         $this->cdn_ttl = NULL;
         $this->cdn_log_retention = NULL;
         $this->cdn_acl_user_agent = NULL;
@@ -1023,7 +1035,7 @@ class CF_Container
         }
         if ($this->cdn_uri != NULL) {
             # previously published, assume we're setting new attributes
-            list($status, $reason, $cdn_uri) =
+            list($status, $reason, $cdn_uri, $cdn_ssl_uri) =
                 $this->cfs_http->update_cdn_container($this->name,$ttl,
                                                       $this->cdn_log_retention,
                                                       $this->cdn_acl_user_agent,
@@ -1034,13 +1046,13 @@ class CF_Container
             if ($status == 404) {
                 # this instance _thinks_ the container was published, but the
                 # cdn management system thinks otherwise - try again with a PUT
-                list($status, $reason, $cdn_uri) =
+                list($status, $reason, $cdn_uri, $cdn_ssl_uri) =
                     $this->cfs_http->add_cdn_container($this->name,$ttl);
 
             }
         } else {
             # publish it for first time
-            list($status, $reason, $cdn_uri) =
+            list($status, $reason, $cdn_uri, $cdn_ssl_uri) =
                 $this->cfs_http->add_cdn_container($this->name,$ttl);
         }
         #if ($status == 401 && $this->_re_auth()) {
@@ -1052,13 +1064,44 @@ class CF_Container
         }
         $this->cdn_enabled = True;
         $this->cdn_ttl = $ttl;
+        $this->cdn_ssl_uri = $cdn_ssl_uri;
         $this->cdn_uri = $cdn_uri;
         $this->cdn_log_retention = False;
         $this->cdn_acl_user_agent = "";
         $this->cdn_acl_referrer = "";
         return $this->cdn_uri;
     }
-
+    /**
+     * Purge Containers objects from CDN Cache.
+     * Example:
+     * <code>
+     * # ... authentication code excluded (see previous examples) ...
+     * #
+     * $conn = new CF_Authentication($auth);
+     * $container = $conn->get_container("cdn_enabled");
+     * $container->purge_from_cdn("user@domain.com");
+     * # or
+     * $container->purge_from_cdn();
+     * # or 
+     * $container->purge_from_cdn("user1@domain.com,user2@domain.com");
+     * @returns boolean True if successful
+     * @throws CDNNotEnabledException if CDN Is not enabled on this connection
+     * @throws InvalidResponseException if the response expected is not returned
+     */
+    function purge_from_cdn($email=null)
+    {
+        if (!$this->cfs_http->getCDNMUrl()) 
+        {
+            throw new CDNNotEnabledException(
+                "Authentication response did not indicate CDN availability");
+        }
+        $status = $this->cfs_http->purge_from_cdn($this->name, $email);
+        if ($status < 199 or $status > 299) {
+            throw new InvalidResponseException(
+                "Invalid response (".$status."): ".$this->cfs_http->get_error());
+        } 
+        return True;
+    }
     /**
      * Enable ACL restriction by User Agent for this container.
      *
@@ -1232,6 +1275,7 @@ class CF_Container
         $this->cdn_enabled = False;
         $this->cdn_ttl = NULL;
         $this->cdn_uri = NULL;
+        $this->cdn_ssl_uri = NULL;
         $this->cdn_log_retention = NULL;
         $this->cdn_acl_user_agent = NULL;
         $this->cdn_acl_referrer = NULL;
@@ -1438,7 +1482,7 @@ class CF_Container
         }
         $objects = array();
         foreach ($obj_array as $obj) {
-            $tmp = new CF_Object($this, $obj["name"], False, True);
+            $tmp = new CF_Object($this, $obj["name"], False, False);
             $tmp->content_type = $obj["content_type"];
             $tmp->content_length = (float) $obj["bytes"];
             $tmp->set_etag($obj["hash"]);
@@ -1508,7 +1552,7 @@ class CF_Container
      *
      * Given an Object whos name contains '/' path separators, this function
      * will create the "directory marker" Objects of one byte with the
-     * Content-Type of "application/folder".
+     * Content-Type of "application/directory".
      *
      * It assumes the last element of the full path is the "real" Object
      * and does NOT create a remote storage Object for that last element.
@@ -1539,7 +1583,7 @@ class CF_Container
      */
     private function _cdn_initialize()
     {
-        list($status, $reason, $cdn_enabled, $cdn_uri, $cdn_ttl,
+        list($status, $reason, $cdn_enabled, $cdn_ssl_uri, $cdn_uri, $cdn_ttl,
              $cdn_log_retention, $cdn_acl_user_agent, $cdn_acl_referrer) =
             $this->cfs_http->head_cdn_container($this->name);
         #if ($status == 401 && $this->_re_auth()) {
@@ -1550,6 +1594,7 @@ class CF_Container
                 "Invalid response (".$status."): ".$this->cfs_http->get_error());
         }
         $this->cdn_enabled = $cdn_enabled;
+        $this->cdn_ssl_uri = $cdn_ssl_uri;
         $this->cdn_uri = $cdn_uri;
         $this->cdn_ttl = $cdn_ttl;
         $this->cdn_log_retention = $cdn_log_retention;
@@ -1589,6 +1634,7 @@ class CF_Object
     public $content_type;
     public $content_length;
     public $metadata;
+    public $manifest;
     private $etag;
 
     /**
@@ -1617,6 +1663,7 @@ class CF_Object
         $this->content_type = NULL;
         $this->content_length = 0;
         $this->metadata = array();
+        $this->manifest = NULL;
         if ($dohead) {
             if (!$this->_initialize() && $force_exists) {
                 throw new NoSuchObjectException("No such object '".$name."'");
@@ -1724,6 +1771,32 @@ class CF_Object
     {
         if ($this->container->cdn_enabled) {
             return $this->container->cdn_uri . "/" . $this->name;
+        }
+        return NULL;
+    }
+
+       /**
+     * String representation of the Object's public SSL URI
+     *
+     * A string representing the Object's public SSL URI assuming that it's
+     * parent Container is CDN-enabled.
+     *
+     * Example:
+     * <code>
+     * # ... authentication/connection/container code excluded
+     * # ... see previous examples
+     *
+     * # Print out the Object's CDN SSL URI (if it has one) in an HTML img-tag
+     * #
+     * print "<img src='$pic->public_ssl_uri()' />\n";
+     * </code>
+     *
+     * @return string Object's public SSL URI or NULL
+     */
+    function public_ssl_uri()
+    {
+        if ($this->container->cdn_enabled) {
+            return $this->container->cdn_ssl_uri . "/" . $this->name;
         }
         return NULL;
     }
@@ -1860,7 +1933,7 @@ class CF_Object
      */
     function sync_metadata()
     {
-        if (!empty($this->metadata)) {
+        if (!empty($this->metadata) || $this->manifest) {
             $status = $this->container->cfs_http->update_object($this);
             #if ($status == 401 && $this->_re_auth()) {
             #    return $this->sync_metadata();
@@ -1873,7 +1946,37 @@ class CF_Object
         }
         return False;
     }
+    /**
+     * Store new Object manifest
+     *
+     * Write's an Object's manifest to the remote Object.  This will overwrite
+     * an prior Object manifest.
+     *
+     * Example:
+     * <code>
+     * # ... authentication/connection/container code excluded
+     * # ... see previous examples
+     *
+     * $my_docs = $conn->get_container("documents");
+     * $doc = $my_docs->get_object("README");
+     *
+     * # Define new manifest for the object
+     * #
+     * $doc->manifest = "container/prefix";
+     *
+     * # Push the new manifest up to the storage system
+     * #
+     * $doc->sync_manifest();
+     * </code>
+     *
+     * @return boolean <kbd>True</kbd> if successful, <kbd>False</kbd> otherwise
+     * @throws InvalidResponseException unexpected response
+     */
 
+    function sync_manifest()
+    {
+        return $this->sync_metadata();
+    }
     /**
      * Upload Object's data to Cloud Files
      *
@@ -1906,7 +2009,7 @@ class CF_Object
      */
     function write($data=NULL, $bytes=0, $verify=True)
     {
-        if (!$data) {
+        if (!$data && !is_string($data)) {
             throw new SyntaxException("Missing data source.");
         }
         if ($bytes > MAX_OBJECT_SIZE) {
@@ -2055,6 +2158,38 @@ class CF_Object
         fclose($fp);
         return $result;
     }
+       /**
+     * Purge this Object from CDN Cache.
+     * Example:
+     * <code>
+     * # ... authentication code excluded (see previous examples) ...
+     * #
+     * $conn = new CF_Authentication($auth);
+     * $container = $conn->get_container("cdn_enabled");
+     * $obj = $container->get_object("object");
+     * $obj->purge_from_cdn("user@domain.com");
+     * # or
+     * $obj->purge_from_cdn();
+     * # or 
+     * $obj->purge_from_cdn("user1@domain.com,user2@domain.com");
+     * @returns boolean True if successful
+     * @throws CDNNotEnabledException if CDN Is not enabled on this connection
+     * @throws InvalidResponseException if the response expected is not returned
+     */
+    function purge_from_cdn($email=null)
+    {
+        if (!$this->container->cfs_http->getCDNMUrl())
+        {
+            throw new CDNNotEnabledException(
+                "Authentication response did not indicate CDN availability");
+        }
+        $status = $this->container->cfs_http->purge_from_cdn($this->container->name . "/" . $this->name, $email);
+        if ($status < 199 or $status > 299) {
+            throw new InvalidResponseException(
+                "Invalid response (".$status."): ".$this->container->cfs_http->get_error());
+        }
+        return True;
+    }
 
     /**
      * Set Object's MD5 checksum
@@ -2122,7 +2257,7 @@ class CF_Object
     private function _initialize()
     {
         list($status, $reason, $etag, $last_modified, $content_type,
-            $content_length, $metadata) =
+            $content_length, $metadata, $manifest) =
                 $this->container->cfs_http->head_object($this);
         #if ($status == 401 && $this->_re_auth()) {
         #    return $this->_initialize();
@@ -2139,6 +2274,7 @@ class CF_Object
         $this->content_type = $content_type;
         $this->content_length = $content_length;
         $this->metadata = $metadata;
+        $this->manifest = $manifest;
         return True;
     }
 
