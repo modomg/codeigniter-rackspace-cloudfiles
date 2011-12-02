@@ -1535,7 +1535,7 @@ class CF_Container
         #if ($status == 401 && $this->_re_auth()) {
         #    return $this->delete_object($obj);
         #}
-        /*if ($status == 404) {
+        if ($status == 404) {
             $m = "Specified object '".$this->name."/".$obj_name;
             $m.= "' did not exist to delete.";
             throw new NoSuchObjectException($m);
@@ -1543,7 +1543,7 @@ class CF_Container
         if ($status != 204) {
             throw new InvalidResponseException(
                 "Invalid response (".$status."): ".$this->cfs_http->get_error());
-        }*/
+        }
         return True;
     }
 

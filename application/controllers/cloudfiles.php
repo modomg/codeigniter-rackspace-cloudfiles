@@ -7,6 +7,7 @@ class Cloudfiles extends CI_Controller{
 		parent::__construct();
         
         $this->load->library('cf/cfiles');
+        $this->cfiles->cf_container = 'rs_cloud_test'; // this always needs to be set
 	}
 	
 	public function index()
@@ -16,10 +17,7 @@ class Cloudfiles extends CI_Controller{
 	
 	public function create_container()
 	{
-		$this->cfiles->cf_container = 'rs_cloud_test';
-		$container_url = $this->cfiles->do_container('a');
-        
-        if($container_url)
+		if($container_url = $this->cfiles->do_container('a'))
         {
             die('Your new CDN URL is: '.$container_url);
         }
@@ -31,20 +29,16 @@ class Cloudfiles extends CI_Controller{
 	
 	public function add_local_file()
 	{
-		$this->cfiles->cf_container = 'rs_cloud_test';
-        
 		$file_location = '/assets/images/';
 		$file_name = 'logo.jpg';
         
 		$this->cfiles->do_object('a', $file_name, $file_location);
         
-        die('Image Added!');
+        $this->_show_errors('Image Added!');
 	}
 	
 	public function add_uploaded_file()
 	{
-		$this->cfiles->cf_container = 'rs_cloud_test';
-        
 		$file_location = '/assets/uploads/';
         
 		$original_name = 'product_image.jpg';
@@ -69,72 +63,108 @@ class Cloudfiles extends CI_Controller{
          * }
          */
         
-        die('Image Added!');
+        $this->_show_errors('Image Added!');
 	}
 	
 	public function add_local_file_folder()
 	{
-		$this->cfiles->cf_container = 'rs_cloud_test';
-        $this->cfiles->cf_folder = 'images/';
+		$this->cfiles->cf_folder = 'images/';
+		//$this->cfiles->cf_folder = 'as/many/levels/as/you/want/too/';
         
 		$file_location = '/assets/images/';
 		$file_name = 'logo.jpg';
         
 		$this->cfiles->do_object('a', $file_name, $file_location);
         
-        die('Image Added!');
+        $this->_show_errors('Image Added!');
 	}
 	
 	public function container_info()
 	{
-		$this->cfiles->cf_container = 'rs_cloud_test';
-		$container_info = $this->cfiles->container_info();
+		if($container_info = $this->cfiles->container_info())
+        {
+            /**
+             * [name]
+             * [object_count]
+             * [bytes_used]
+             * [cdn_enabled]
+             * [cdn_uri]
+             * [cdn_ttl]
+             * [cdn_log_retention]
+             * [cdn_acl_user_agent] 
+             * [cdn_acl_referrer] 
+             */
+
+            echo '<p>'.$container_info->name.'</p>';
+            echo '<p>'.$container_info->cdn_uri.'</p>';
+        }
+        else
+        {
+            die('Container Invalid');
+        }
         
-        /**
-         * [name]
-         * [object_count]
-         * [bytes_used]
-         * [cdn_enabled]
-         * [cdn_uri]
-         * [cdn_ttl]
-         * [cdn_log_retention]
-         * [cdn_acl_user_agent] 
-         * [cdn_acl_referrer] 
-         */
+        $this->_show_errors();
 	}
 	
 	public function container_objects()
 	{
-		$this->cfiles->cf_container = 'rs_cloud_test';
-		$objects = $this->cfiles->get_objects();
-        
-        foreach($objects as $object)
+		if($objects = $this->cfiles->get_objects())
         {
-            //do something
-            /**
-             * [name]
-             * [last_modified]
-             * [content_type]
-             * [content_length]
-             * [metadata] => Array
-             * (
-             *      [Original]
-             * )
-             * 
-             * metadata will only be available if you originally put it in
-             */
+            foreach($objects as $object)
+            {
+                //do something
+                /**
+                 * [name]
+                 * [last_modified]
+                 * [content_type]
+                 * [content_length]
+                 * [metadata] => Array
+                 * (
+                 *      [Original]
+                 * )
+                 * 
+                 * metadata will only be available if you originally put it in
+                 */
+                echo '<p>'.$object->name.' - '.$object->content_type.'</p>';
+            }
         }
+        
+        $this->_show_errors();
 	}
 	
 	public function container_objects_folder()
 	{
-		$this->cfiles->cf_container = 'rs_cloud_test';
-        $this->cfiles->cf_folder = 'images/';
-		$objects = $this->cfiles->get_objects();
-        
-        foreach($objects as $object)
+		$this->cfiles->cf_folder = 'images/';
+		if($objects = $this->cfiles->get_objects())
         {
-            //do something
+            foreach($objects as $object)
+            {
+                //do something
+                /**
+                 * [name]
+                 * [last_modified]
+                 * [content_type]
+                 * [content_length]
+                 * [metadata] => Array
+                 * (
+                 *      [Original]
+                 * )
+                 * 
+                 * metadata will only be available if you originally put it in
+                 */
+                echo '<p>'.$object->name.' - '.$object->content_type.'</p>';
+            }
+        }
+        
+        $this->_show_errors();
+	}
+	
+	public function get_object()
+	{
+		$file_name = 'logo.jpg';
+        
+		if($object = $this->cfiles->get_object($file_name))
+        {
             /**
              * [name]
              * [last_modified]
@@ -147,75 +177,84 @@ class Cloudfiles extends CI_Controller{
              * 
              * metadata will only be available if you originally put it in
              */
+
+            echo '<p>'.$object->name.' - '.$object->content_type.'</p>';
         }
         
-        echo "<pre>";
-        print_r($objects);
-        echo "</pre>";
-	}
-	
-	public function get_object()
-	{
-		$this->cfiles->cf_container = 'rs_cloud_test';
-		$file_name = 'logo.jpg';
-        
-		$object = $this->cfiles->get_object($file_name);
-        
-        /**
-         * [name]
-         * [last_modified]
-         * [content_type]
-         * [content_length]
-         * [metadata] => Array
-         * (
-         *      [Original]
-         * )
-         * 
-         * metadata will only be available if you originally put it in
-         */
+        $this->_show_errors();
 	}
 	
 	public function download_object()
 	{
-		$this->cfiles->cf_container = 'rs_cloud_test';
 		$cloud_file_name = 'logo.jpg';
 		$local_file_name = 'downloaded_logo.jpg';
 		$file_location = '/assets/images/';
         
 		$this->cfiles->download_object($cloud_file_name, $local_file_name, $file_location);
         
-        die('Image Saved!');
+        $this->_show_errors('Image Saved!');
 	}
 	
 	public function delete_file()
 	{
-		$this->cfiles->cf_container = 'rs_cloud_test';
 		$file_name = 'logo.jpg';
         
-		$this->cfiles->do_object('d', $file_name);
-        
-        die('Image Deleted!');
+		if($this->cfiles->do_object('d', $file_name))
+        {
+            die('Image Deleted!');
+        }
+        else
+        {
+            die('Image NOT Deleted!');
+        }
 	}
+    
+    public function delete_fake_files()
+    {
+        $files = array('bad_reference1.jpg', 'bad_reference2.jpg', 'bad_reference3.jpg');
+        
+        foreach($files as $file)
+        {
+            $this->cfiles->do_object('d', $file);
+        }
+        
+        $this->_show_errors('All files deleted!');
+    }
 	
 	public function delete_file_folder()
 	{
-		$this->cfiles->cf_container = 'rs_cloud_test';
-        $this->cfiles->cf_folder = 'images/';
+		$this->cfiles->cf_folder = 'images/';
         
 		$file_name = 'logo.jpg';
         
 		$this->cfiles->do_object('d', $file_name);
         
-        die('Image Deleted!');
+        $this->_show_errors('Image Deleted!');
 	}
 	
 	public function delete_container()
 	{
-		$this->cfiles->cf_container = 'rs_cloud_test';
 		$this->cfiles->do_container('d');
         
-        die('Container Deleted!');
+        $this->_show_errors('Container Deleted!');
 	}
+    
+    private function _show_errors($success_msg='All Good!')
+    {
+        if($this->cfiles->has_errors())
+        {
+            echo 'The following errors were found:<ul>';
+            foreach($this->cfiles->get_errors() as $error)
+            {
+                echo '<li>'.$error.'</li>';
+            }
+            echo '</ul>';
+        }
+        else
+        {
+            die($success_msg);
+        }
+    }
 }
 
 /* End of file cloudfiles.php */
