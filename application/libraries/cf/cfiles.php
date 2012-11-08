@@ -284,8 +284,8 @@ class Cfiles{
     
     private function _show_error($e)
     {
-        echo 'Caught exception: '.$e->getMessage();
-        die();
+        show_error($e->getMessage());
+        log_message('error', $e->getMessage());
     }
     
     private function _handle_error($e)
