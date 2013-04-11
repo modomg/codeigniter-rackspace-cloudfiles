@@ -151,7 +151,9 @@ class Cfiles{
 	public function do_object($action='a', $file_name='', $file_location='', $original_file='')
 	{
 		$my_container = $this->container_info();
-		
+		if( $my_container === false ) {
+			return false;
+		}
 		if($action == 'a') //add
 		{
             try
@@ -232,6 +234,9 @@ class Cfiles{
 	public function get_objects()
 	{
 		$my_container = $this->container_info();
+		if( $my_container === false ) {
+			return false;
+		}
         
         try
         {
@@ -247,6 +252,9 @@ class Cfiles{
 	public function get_object($name)
 	{
 		$my_container = $this->container_info();
+		if( $my_container === false ) {
+			return false;
+		}
         try
         {
             return $my_container->get_object($name);
@@ -261,6 +269,9 @@ class Cfiles{
     public function download_object($current_name, $new_name, $location)
     {
         $my_container = $this->container_info();
+	if( $my_container === false ) {
+		return false;
+	}
         try
         {
             $my_file = $my_container->get_object($current_name);
