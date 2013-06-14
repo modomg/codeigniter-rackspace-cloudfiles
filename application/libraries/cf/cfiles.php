@@ -6,10 +6,10 @@ if(!defined('BASEPATH')) exit('No direct script access allowed');
  * Description:
  * This library helps you use the Rackspace Cloudfiles API more efficiently.
  *
- * For installation and usage: https://bitbucket.org/modomg/codeigniter-rackspace-cloudfiles/
+ * For installation and usage: https://github.com/modomg/codeigniter-rackspace-cloudfiles
  *
  * @copyright	Copyright (c) 2011 Modo Media Group
- * @version 	1.2
+ * @version 	1.3
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal

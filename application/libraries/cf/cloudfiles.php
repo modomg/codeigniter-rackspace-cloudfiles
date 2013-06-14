@@ -201,7 +201,7 @@ class CF_Authentication
      */
     function authenticate($version=DEFAULT_CF_API_VERSION)
     {
-        list($status,$reason,$surl,$curl,$atoken) = 
+        list($status,$reason,$surl,$curl,$atoken) =
                 $this->cfs_http->authenticate($this->username, $this->api_key,
                 $this->account_name, $this->auth_host);
 
@@ -232,11 +232,11 @@ class CF_Authentication
          * #Pass Cached URL's and Token as Args
 	 * $auth->load_cached_credentials("auth_token", "storage_url", "cdn_management_url");
          * </code>
-	 * 
+	 *
 	 * @param string $auth_token A Cloud Files Auth Token (Required)
          * @param string $storage_url The Cloud Files Storage URL (Required)
          * @param string $cdnm_url CDN Management URL (Required)
-         * @return boolean <kbd>True</kbd> if successful 
+         * @return boolean <kbd>True</kbd> if successful
 	 * @throws SyntaxException If any of the Required Arguments are missing
          */
 	function load_cached_credentials($auth_token, $storage_url, $cdnm_url)
@@ -267,7 +267,7 @@ class CF_Authentication
          * $auth->authenticate();
          * $array = $auth->export_credentials();
          * </code>
-         * 
+         *
 	 * @return array of url's and an auth token.
          */
     function export_credentials()
@@ -408,19 +408,19 @@ class CF_Connection
      *
      * Example:
      * <code>
-     *  
+     *
      * $conn->close();
-     * 
+     *
      * </code>
      *
      * Will close all current cUrl active connections.
-     * 
+     *
      */
     public function close()
     {
         $this->cfs_http->close();
     }
-    
+
     /**
      * Cloud Files account information
      *
@@ -431,7 +431,7 @@ class CF_Connection
      * <code>
      * # ... authentication code excluded (see previous examples) ...
      * #
-     * $conn = new CF_Authentication($auth);
+     * $conn = new CF_Connection($auth);
      *
      * list($quantity, $bytes) = $conn->get_info();
      * print "Number of containers: " . $quantity . "\n";
@@ -465,7 +465,7 @@ class CF_Connection
      * <code>
      * # ... authentication code excluded (see previous examples) ...
      * #
-     * $conn = new CF_Authentication($auth);
+     * $conn = new CF_Connection($auth);
      *
      * $images = $conn->create_container("my photos");
      * </code>
@@ -479,8 +479,8 @@ class CF_Connection
     {
         if ($container_name != "0" and !isset($container_name))
             throw new SyntaxException("Container name not set.");
-        
-        if (!isset($container_name) or $container_name == "") 
+
+        if (!isset($container_name) or $container_name == "")
             throw new SyntaxException("Container name not set.");
 
         if (strpos($container_name, "/") !== False) {
@@ -520,7 +520,7 @@ class CF_Connection
      * <code>
      * # ... authentication code excluded (see previous examples) ...
      * #
-     * $conn = new CF_Authentication($auth);
+     * $conn = new CF_Connection($auth);
      *
      * $conn->delete_container("my photos");
      * </code>
@@ -535,7 +535,7 @@ class CF_Connection
     function delete_container($container=NULL)
     {
         $container_name = NULL;
-        
+
         if (is_object($container)) {
             if (get_class($container) == "CF_Container") {
                 $container_name = $container->name;
@@ -582,7 +582,7 @@ class CF_Connection
      * <code>
      * # ... authentication code excluded (see previous examples) ...
      * #
-     * $conn = new CF_Authentication($auth);
+     * $conn = new CF_Connection($auth);
      *
      * $images = $conn->get_container("my photos");
      * print "Number of Objects: " . $images->count . "\n";
@@ -623,7 +623,7 @@ class CF_Connection
      * <code>
      * # ... authentication code excluded (see previous examples) ...
      * #
-     * $conn = new CF_Authentication($auth);
+     * $conn = new CF_Connection($auth);
      *
      * $clist = $conn->get_containers();
      * foreach ($clist as $cont) {
@@ -664,7 +664,7 @@ class CF_Connection
      * <code>
      * # ... authentication code excluded (see previous examples) ...
      * #
-     * $conn = new CF_Authentication($auth);
+     * $conn = new CF_Connection($auth);
      *
      * $container_list = $conn->list_containers();
      * print_r($container_list);
@@ -730,7 +730,7 @@ class CF_Connection
      */
     function list_containers_info($limit=0, $marker=NULL)
     {
-        list($status, $reason, $container_info) = 
+        list($status, $reason, $container_info) =
                 $this->cfs_http->list_containers_info($limit, $marker);
         #if ($status == 401 && $this->_re_auth()) {
         #    return $this->list_containers_info($limit, $marker);
@@ -754,7 +754,7 @@ class CF_Connection
      * <code>
      * # ... authentication code excluded (see previous examples) ...
      * #
-     * $conn = new CF_Authentication($auth);
+     * $conn = new CF_Connection($auth);
      *
      * $public_containers = $conn->list_public_containers();
      * print_r($public_containers);
@@ -921,8 +921,9 @@ class CF_Container
     public $name;
     public $object_count;
     public $bytes_used;
-
+    public $metadata;
     public $cdn_enabled;
+    public $cdn_streaming_uri;
     public $cdn_ssl_uri;
     public $cdn_uri;
     public $cdn_ttl;
@@ -958,9 +959,11 @@ class CF_Container
         $this->name = $name;
         $this->object_count = $count;
         $this->bytes_used = $bytes;
+        $this->metadata = array();
         $this->cdn_enabled = NULL;
         $this->cdn_uri = NULL;
         $this->cdn_ssl_uri = NULL;
+        $this->cdn_streaming_uri = NULL;
         $this->cdn_ttl = NULL;
         $this->cdn_log_retention = NULL;
         $this->cdn_acl_user_agent = NULL;
@@ -995,8 +998,8 @@ class CF_Container
             if ($this->cdn_acl_referrer != NULL) {
                 $me .= ", cdn acl referrer: " . $this->cdn_acl_referrer;
             }
-            
-            
+
+
         }
         return $me;
     }
@@ -1012,7 +1015,7 @@ class CF_Container
      * <code>
      * # ... authentication code excluded (see previous examples) ...
      * #
-     * $conn = new CF_Authentication($auth);
+     * $conn = new CF_Connection($auth);
      *
      * $public_container = $conn->create_container("public");
      *
@@ -1077,12 +1080,12 @@ class CF_Container
      * <code>
      * # ... authentication code excluded (see previous examples) ...
      * #
-     * $conn = new CF_Authentication($auth);
+     * $conn = new CF_Connection($auth);
      * $container = $conn->get_container("cdn_enabled");
      * $container->purge_from_cdn("user@domain.com");
      * # or
      * $container->purge_from_cdn();
-     * # or 
+     * # or
      * $container->purge_from_cdn("user1@domain.com,user2@domain.com");
      * @returns boolean True if successful
      * @throws CDNNotEnabledException if CDN Is not enabled on this connection
@@ -1090,7 +1093,7 @@ class CF_Container
      */
     function purge_from_cdn($email=null)
     {
-        if (!$this->cfs_http->getCDNMUrl()) 
+        if (!$this->cfs_http->getCDNMUrl())
         {
             throw new CDNNotEnabledException(
                 "Authentication response did not indicate CDN availability");
@@ -1099,7 +1102,7 @@ class CF_Container
         if ($status < 199 or $status > 299) {
             throw new InvalidResponseException(
                 "Invalid response (".$status."): ".$this->cfs_http->get_error());
-        } 
+        }
         return True;
     }
     /**
@@ -1109,7 +1112,7 @@ class CF_Container
      * <code>
      * # ... authentication code excluded (see previous examples) ...
      * #
-     * $conn = new CF_Authentication($auth);
+     * $conn = new CF_Connection($auth);
      *
      * $public_container = $conn->get_container("public");
      *
@@ -1149,7 +1152,7 @@ class CF_Container
      * <code>
      * # ... authentication code excluded (see previous examples) ...
      * #
-     * $conn = new CF_Authentication($auth);
+     * $conn = new CF_Connection($auth);
      *
      * $public_container = $conn->get_container("public");
      *
@@ -1181,7 +1184,7 @@ class CF_Container
         $this->cdn_acl_referrer = $cdn_acl_referrer;
         return True;
     }
-    
+
     /**
      * Enable log retention for this CDN container.
      *
@@ -1190,12 +1193,12 @@ class CF_Container
      * uploaded to a ".CDN_ACCESS_LOGS" container in the form of
      * "container_name.YYYYMMDDHH-XXXX.gz". Requires CDN be enabled on
      * the account.
-     * 
+     *
      * Example:
      * <code>
      * # ... authentication code excluded (see previous examples) ...
      * #
-     * $conn = new CF_Authentication($auth);
+     * $conn = new CF_Connection($auth);
      *
      * $public_container = $conn->get_container("public");
      *
@@ -1227,7 +1230,7 @@ class CF_Container
         $this->cdn_log_retention = $cdn_log_retention;
         return True;
     }
-    
+
     /**
      * Disable the CDN sharing for this container
      *
@@ -1243,7 +1246,7 @@ class CF_Container
      * <code>
      * # ... authentication code excluded (see previous examples) ...
      * #
-     * $conn = new CF_Authentication($auth);
+     * $conn = new CF_Connection($auth);
      *
      * $public_container = $conn->get_container("public");
      *
@@ -1276,6 +1279,7 @@ class CF_Container
         $this->cdn_ttl = NULL;
         $this->cdn_uri = NULL;
         $this->cdn_ssl_uri = NULL;
+        $this->cdn_streaming_uri - NULL;
         $this->cdn_log_retention = NULL;
         $this->cdn_acl_user_agent = NULL;
         $this->cdn_acl_referrer = NULL;
@@ -1292,7 +1296,7 @@ class CF_Container
      * <code>
      * # ... authentication code excluded (see previous examples) ...
      * #
-     * $conn = new CF_Authentication($auth);
+     * $conn = new CF_Connection($auth);
      *
      * $public_container = $conn->get_container("public");
      *
@@ -1318,7 +1322,7 @@ class CF_Container
      * <code>
      * # ... authentication code excluded (see previous examples) ...
      * #
-     * $conn = new CF_Authentication($auth);
+     * $conn = new CF_Connection($auth);
      *
      * $public_container = $conn->get_container("public");
      *
@@ -1346,7 +1350,7 @@ class CF_Container
      * <code>
      * # ... authentication code excluded (see previous examples) ...
      * #
-     * $conn = new CF_Authentication($auth);
+     * $conn = new CF_Connection($auth);
      *
      * $public_container = $conn->get_container("public");
      *
@@ -1383,7 +1387,7 @@ class CF_Container
      * # Grab subsets of all storage objects
      * #
      * $first_ten = $images->list_objects(10);
-     * 
+     *
      * # Note the use of the previous result's last object name being
      * # used as the 'marker' parameter to fetch the next 10 objects
      * #
@@ -1468,11 +1472,11 @@ class CF_Container
      * @return array array of strings
      * @throws InvalidResponseException unexpected response
      */
-    function get_objects($limit=0, $marker=NULL, $prefix=NULL, $path=NULL)
+    function get_objects($limit=0, $marker=NULL, $prefix=NULL, $path=NULL, $delimiter=NULL)
     {
         list($status, $reason, $obj_array) =
             $this->cfs_http->get_objects($this->name, $limit,
-                $marker, $prefix, $path);
+                $marker, $prefix, $path, $delimiter);
         #if ($status == 401 && $this->_re_auth()) {
         #    return $this->get_objects($limit, $marker, $prefix, $path);
         #}
@@ -1482,42 +1486,48 @@ class CF_Container
         }
         $objects = array();
         foreach ($obj_array as $obj) {
-            $tmp = new CF_Object($this, $obj["name"], False, True);
+          if(!isset($obj['subdir'])) {
+            $tmp = new CF_Object($this, $obj["name"], False, False);
             $tmp->content_type = $obj["content_type"];
             $tmp->content_length = (float) $obj["bytes"];
             $tmp->set_etag($obj["hash"]);
             $tmp->last_modified = $obj["last_modified"];
             $objects[] = $tmp;
+          }
         }
         return $objects;
     }
 
     /**
-     * Delete a remote storage Object
+     * Copy a remote storage Object to a target Container
      *
-     * Given an Object instance or name, permanently remove the remote Object
+     * Given an Object instance or name and a target Container instance or name, copy copies the remote Object
      * and all associated metadata.
      *
      * Example:
      * <code>
      * # ... authentication code excluded (see previous examples) ...
      * #
-     * $conn = new CF_Authentication($auth);
+     * $conn = new CF_Connection($auth);
      *
      * $images = $conn->get_container("my photos");
      *
-     * # Delete specific object
+     * # Copy specific object
      * #
-     * $images->delete_object("disco_dancing.jpg");
+     * $images->copy_object_to("disco_dancing.jpg","container_target");
      * </code>
      *
-     * @param obj $obj name or instance of Object to delete
-     * @return boolean <kbd>True</kbd> if successfully removed
-     * @throws SyntaxException invalid Object name
+     * @param obj $obj name or instance of Object to copy
+     * @param obj $container_target name or instance of target Container
+     * @param string $dest_obj_name name of target object (optional - uses source name if omitted)
+     * @param array $metadata metadata array for new object (optional)
+     * @param array $headers header fields array for the new object (optional)
+     * @return boolean <kbd>true</kbd> if successfully copied
+     * @throws SyntaxException invalid Object/Container name
      * @throws NoSuchObjectException remote Object does not exist
      * @throws InvalidResponseException unexpected response
      */
-    function delete_object($obj)
+    function copy_object_to($obj,$container_target,$dest_obj_name=NULL,$metadata=NULL,$headers=NULL)
     {
         $obj_name = NULL;
         if (is_object($obj)) {
@@ -1531,12 +1541,258 @@ class CF_Container
         if (!$obj_name) {
             throw new SyntaxException("Object name not set.");
         }
-        $status = $this->cfs_http->delete_object($this->name, $obj_name);
+
+				if ($dest_obj_name === NULL) {
+            $dest_obj_name = $obj_name;
+				}
+
+        $container_name_target = NULL;
+        if (is_object($container_target)) {
+            if (get_class($container_target) == "CF_Container") {
+                $container_name_target = $container_target->name;
+            }
+        }
+        if (is_string($container_target)) {
+            $container_name_target = $container_target;
+        }
+        if (!$container_name_target) {
+            throw new SyntaxException("Container name target not set.");
+        }
+
+        $status = $this->cfs_http->copy_object($obj_name,$dest_obj_name,$this->name,$container_name_target,$metadata,$headers);
+        if ($status == 404) {
+            $m = "Specified object '".$this->name."/".$obj_name;
+            $m.= "' did not exist as source to copy from or '".$container_name_target."' did not exist as target to copy to.";
+            throw new NoSuchObjectException($m);
+        }
+        if ($status < 200 || $status > 299) {
+            throw new InvalidResponseException(
+                "Invalid response (".$status."): ".$this->cfs_http->get_error());
+        }
+        return true;
+    }
+
+    /**
+     * Copy a remote storage Object from a source Container
+     *
+     * Given an Object instance or name and a source Container instance or name, copy copies the remote Object
+     * and all associated metadata.
+     *
+     * Example:
+     * <code>
+     * # ... authentication code excluded (see previous examples) ...
+     * #
+     * $conn = new CF_Connection($auth);
+     *
+     * $images = $conn->get_container("my photos");
+     *
+     * # Copy specific object
+     * #
+     * $images->copy_object_from("disco_dancing.jpg","container_source");
+     * </code>
+     *
+     * @param obj $obj name or instance of Object to copy
+     * @param obj $container_source name or instance of source Container
+     * @param string $dest_obj_name name of target object (optional - uses source name if omitted)
+     * @param array $metadata metadata array for new object (optional)
+     * @param array $headers header fields array for the new object (optional)
+     * @return boolean <kbd>true</kbd> if successfully copied
+     * @throws SyntaxException invalid Object/Container name
+     * @throws NoSuchObjectException remote Object does not exist
+     * @throws InvalidResponseException unexpected response
+     */
+    function copy_object_from($obj,$container_source,$dest_obj_name=NULL,$metadata=NULL,$headers=NULL)
+    {
+        $obj_name = NULL;
+        if (is_object($obj)) {
+            if (get_class($obj) == "CF_Object") {
+                $obj_name = $obj->name;
+            }
+        }
+        if (is_string($obj)) {
+            $obj_name = $obj;
+        }
+        if (!$obj_name) {
+            throw new SyntaxException("Object name not set.");
+        }
+
+				if ($dest_obj_name === NULL) {
+            $dest_obj_name = $obj_name;
+				}
+
+        $container_name_source = NULL;
+        if (is_object($container_source)) {
+            if (get_class($container_source) == "CF_Container") {
+                $container_name_source = $container_source->name;
+            }
+        }
+        if (is_string($container_source)) {
+            $container_name_source = $container_source;
+        }
+        if (!$container_name_source) {
+            throw new SyntaxException("Container name source not set.");
+        }
+
+        $status = $this->cfs_http->copy_object($obj_name,$dest_obj_name,$container_name_source,$this->name,$metadata,$headers);
+        if ($status == 404) {
+            $m = "Specified object '".$container_name_source."/".$obj_name;
+            $m.= "' did not exist as source to copy from or '".$this->name."/".$obj_name."' did not exist as target to copy to.";
+            throw new NoSuchObjectException($m);
+        }
+        if ($status < 200 || $status > 299) {
+            throw new InvalidResponseException(
+                "Invalid response (".$status."): ".$this->cfs_http->get_error());
+        }
+
+        return true;
+    }
+
+    /**
+     * Move a remote storage Object to a target Container
+     *
+     * Given an Object instance or name and a target Container instance or name, move copies the remote Object
+     * and all associated metadata and deletes the source Object afterwards
+     *
+     * Example:
+     * <code>
+     * # ... authentication code excluded (see previous examples) ...
+     * #
+     * $conn = new CF_Connection($auth);
+     *
+     * $images = $conn->get_container("my photos");
+     *
+     * # Move specific object
+     * #
+     * $images->move_object_to("disco_dancing.jpg","container_target");
+     * </code>
+     *
+     * @param obj $obj name or instance of Object to move
+     * @param obj $container_target name or instance of target Container
+     * @param string $dest_obj_name name of target object (optional - uses source name if omitted)
+     * @param array $metadata metadata array for new object (optional)
+     * @param array $headers header fields array for the new object (optional)
+     * @return boolean <kbd>true</kbd> if successfully moved
+     * @throws SyntaxException invalid Object/Container name
+     * @throws NoSuchObjectException remote Object does not exist
+     * @throws InvalidResponseException unexpected response
+     */
+    function move_object_to($obj,$container_target,$dest_obj_name=NULL,$metadata=NULL,$headers=NULL)
+    {
+    	$retVal = false;
+
+        if(self::copy_object_to($obj,$container_target,$dest_obj_name,$metadata,$headers)) {
+        	$retVal = self::delete_object($obj,$this->name);
+        }
+
+        return $retVal;
+    }
+
+    /**
+     * Move a remote storage Object from a source Container
+     *
+     * Given an Object instance or name and a source Container instance or name, move copies the remote Object
+     * and all associated metadata and deletes the source Object afterwards
+     *
+     * Example:
+     * <code>
+     * # ... authentication code excluded (see previous examples) ...
+     * #
+     * $conn = new CF_Connection($auth);
+     *
+     * $images = $conn->get_container("my photos");
+     *
+     * # Move specific object
+     * #
+     * $images->move_object_from("disco_dancing.jpg","container_target");
+     * </code>
+     *
+     * @param obj $obj name or instance of Object to move
+     * @param obj $container_source name or instance of target Container
+     * @param string $dest_obj_name name of target object (optional - uses source name if omitted)
+     * @param array $metadata metadata array for new object (optional)
+     * @param array $headers header fields array for the new object (optional)
+     * @return boolean <kbd>true</kbd> if successfully moved
+     * @throws SyntaxException invalid Object/Container name
+     * @throws NoSuchObjectException remote Object does not exist
+     * @throws InvalidResponseException unexpected response
+     */
+    function move_object_from($obj,$container_source,$dest_obj_name=NULL,$metadata=NULL,$headers=NULL)
+    {
+    	$retVal = false;
+
+        if(self::copy_object_from($obj,$container_source,$dest_obj_name,$metadata,$headers)) {
+        	$retVal = self::delete_object($obj,$container_source);
+        }
+
+        return $retVal;
+    }
+
+    /**
+     * Delete a remote storage Object
+     *
+     * Given an Object instance or name, permanently remove the remote Object
+     * and all associated metadata.
+     *
+     * Example:
+     * <code>
+     * # ... authentication code excluded (see previous examples) ...
+     * #
+     * $conn = new CF_Connection($auth);
+     *
+     * $images = $conn->get_container("my photos");
+     *
+     * # Delete specific object
+     * #
+     * $images->delete_object("disco_dancing.jpg");
+     * </code>
+     *
+     * @param obj $obj name or instance of Object to delete
+     * @param obj $container name or instance of Container in which the object resides (optional)
+     * @return boolean <kbd>True</kbd> if successfully removed
+     * @throws SyntaxException invalid Object name
+     * @throws NoSuchObjectException remote Object does not exist
+     * @throws InvalidResponseException unexpected response
+     */
+    function delete_object($obj,$container=NULL)
+    {
+        $obj_name = NULL;
+        if (is_object($obj)) {
+            if (get_class($obj) == "CF_Object") {
+                $obj_name = $obj->name;
+            }
+        }
+        if (is_string($obj)) {
+            $obj_name = $obj;
+        }
+        if (!$obj_name) {
+            throw new SyntaxException("Object name not set.");
+        }
+
+        $container_name = NULL;
+
+        if($container === NULL) {
+        	$container_name = $this->name;
+        }
+        else {
+	        if (is_object($container)) {
+	            if (get_class($container) == "CF_Container") {
+	                $container_name = $container->name;
+	            }
+	        }
+	        if (is_string($container)) {
+	            $container_name = $container;
+	        }
+	        if (!$container_name) {
+	            throw new SyntaxException("Container name source not set.");
+	        }
+        }
+
+        $status = $this->cfs_http->delete_object($container_name, $obj_name);
         #if ($status == 401 && $this->_re_auth()) {
         #    return $this->delete_object($obj);
         #}
         if ($status == 404) {
-            $m = "Specified object '".$this->name."/".$obj_name;
+            $m = "Specified object '".$container_name."/".$obj_name;
             $m.= "' did not exist to delete.";
             throw new NoSuchObjectException($m);
         }
@@ -1583,7 +1839,7 @@ class CF_Container
      */
     private function _cdn_initialize()
     {
-        list($status, $reason, $cdn_enabled, $cdn_ssl_uri, $cdn_uri, $cdn_ttl,
+        list($status, $reason, $cdn_enabled, $cdn_ssl_uri, $cdn_streaming_uri, $cdn_uri, $cdn_ttl,
              $cdn_log_retention, $cdn_acl_user_agent, $cdn_acl_referrer) =
             $this->cfs_http->head_cdn_container($this->name);
         #if ($status == 401 && $this->_re_auth()) {
@@ -1594,6 +1850,7 @@ class CF_Container
                 "Invalid response (".$status."): ".$this->cfs_http->get_error());
         }
         $this->cdn_enabled = $cdn_enabled;
+        $this->cdn_streaming_uri = $cdn_streaming_uri;
         $this->cdn_ssl_uri = $cdn_ssl_uri;
         $this->cdn_uri = $cdn_uri;
         $this->cdn_ttl = $cdn_ttl;
@@ -1621,7 +1878,7 @@ class CF_Container
  * Object operations
  *
  * An Object is analogous to a file on a conventional filesystem. You can
- * read data from, or write data to your Objects. You can also associate 
+ * read data from, or write data to your Objects. You can also associate
  * arbitrary metadata with them.
  *
  * @package php-cloudfiles
@@ -1634,6 +1891,7 @@ class CF_Object
     public $content_type;
     public $content_length;
     public $metadata;
+    public $headers;
     public $manifest;
     private $etag;
 
@@ -1663,6 +1921,7 @@ class CF_Object
         $this->content_type = NULL;
         $this->content_length = 0;
         $this->metadata = array();
+        $this->headers = array();
         $this->manifest = NULL;
         if ($dohead) {
             if (!$this->_initialize() && $force_exists) {
@@ -1700,7 +1959,7 @@ class CF_Object
      *
      * if fileinfo is not available it will try to use the internal
      * mime_content_type function.
-     * 
+     *
      * @param string $handle name of file or buffer to guess the type from
      * @return boolean <kbd>True</kbd> if successful
      * @throws BadContentTypeException
@@ -1708,19 +1967,19 @@ class CF_Object
     function _guess_content_type($handle) {
         if ($this->content_type)
             return;
-            
+
         if (function_exists("finfo_open")) {
             $local_magic = dirname(__FILE__) . "/share/magic";
             $finfo = @finfo_open(FILEINFO_MIME, $local_magic);
 
-            if (!$finfo) 
+            if (!$finfo)
                 $finfo = @finfo_open(FILEINFO_MIME);
-                
+
             if ($finfo) {
 
                 if (is_file((string)$handle))
                     $ct = @finfo_file($finfo, $handle);
-                else 
+                else
                     $ct = @finfo_buffer($finfo, $handle);
 
                 /* PHP 5.3 fileinfo display extra information like
@@ -1748,7 +2007,7 @@ class CF_Object
         }
         return True;
     }
-    
+
     /**
      * String representation of the Object's public URI
      *
@@ -1797,6 +2056,31 @@ class CF_Object
     {
         if ($this->container->cdn_enabled) {
             return $this->container->cdn_ssl_uri . "/" . $this->name;
+        }
+        return NULL;
+    }
+    /**
+     * String representation of the Object's public Streaming URI
+     *
+     * A string representing the Object's public Streaming URI assuming that it's
+     * parent Container is CDN-enabled.
+     *
+     * Example:
+     * <code>
+     * # ... authentication/connection/container code excluded
+     * # ... see previous examples
+     *
+     * # Print out the Object's CDN Streaming URI (if it has one) in an HTML img-tag
+     * #
+     * print "<img src='$pic->public_streaming_uri()' />\n";
+     * </code>
+     *
+     * @return string Object's public Streaming URI or NULL
+     */
+    function public_streaming_uri()
+    {
+        if ($this->container->cdn_enabled) {
+            return $this->container->cdn_streaming_uri . "/" . $this->name;
         }
         return NULL;
     }
@@ -1888,7 +2172,7 @@ class CF_Object
      */
     function stream(&$fp, $hdrs=array())
     {
-        list($status, $reason) = 
+        list($status, $reason) =
                 $this->container->cfs_http->get_object_to_stream($this,$fp,$hdrs);
         #if ($status == 401 && $this->_re_auth()) {
         #    return $this->stream($fp, $hdrs);
@@ -1923,6 +2207,12 @@ class CF_Object
      *     "Version" => "1.2.2"
      * );
      *
+     * # Define additional headers for the object
+     * #
+     * $doc->headers = array(
+     *     "Content-Disposition" => "attachment",
+     * );
+     *
      * # Push the new metadata up to the storage system
      * #
      * $doc->sync_metadata();
@@ -1933,7 +2223,7 @@ class CF_Object
      */
     function sync_metadata()
     {
-        if (!empty($this->metadata) || $this->manifest) {
+        if (!empty($this->metadata) || !empty($this->headers) || $this->manifest) {
             $status = $this->container->cfs_http->update_object($this);
             #if ($status == 401 && $this->_re_auth()) {
             #    return $this->sync_metadata();
@@ -2111,14 +2401,14 @@ class CF_Object
         }
 
         clearstatcache();
-        
+
         $size = (float) sprintf("%u", filesize($filename));
         if ($size > MAX_OBJECT_SIZE) {
             throw new SyntaxException("File size exceeds maximum object size.");
         }
 
         $this->_guess_content_type($filename);
-        
+
         $this->write($fp, $size, $verify);
         fclose($fp);
         return True;
@@ -2164,14 +2454,15 @@ class CF_Object
      * <code>
      * # ... authentication code excluded (see previous examples) ...
      * #
-     * $conn = new CF_Authentication($auth);
+     * $conn = new CF_Connection($auth);
      * $container = $conn->get_container("cdn_enabled");
      * $obj = $container->get_object("object");
      * $obj->purge_from_cdn("user@domain.com");
      * # or
      * $obj->purge_from_cdn();
-     * # or 
+     * # or
      * $obj->purge_from_cdn("user1@domain.com,user2@domain.com");
+     * </code>
      * @returns boolean True if successful
      * @throws CDNNotEnabledException if CDN Is not enabled on this connection
      * @throws InvalidResponseException if the response expected is not returned
@@ -2257,7 +2548,7 @@ class CF_Object
     private function _initialize()
     {
         list($status, $reason, $etag, $last_modified, $content_type,
-            $content_length, $metadata, $manifest) =
+            $content_length, $metadata, $manifest, $headers) =
                 $this->container->cfs_http->head_object($this);
         #if ($status == 401 && $this->_re_auth()) {
         #    return $this->_initialize();
@@ -2274,10 +2565,44 @@ class CF_Object
         $this->content_type = $content_type;
         $this->content_length = $content_length;
         $this->metadata = $metadata;
+        $this->headers = $headers;
         $this->manifest = $manifest;
         return True;
     }
+     /**
+     * Generate a Temp Url for a object
+     * Example:
+     * <code>
+     * # ... authentication code excluded (see previous examples) ...
+     * $conn = new CF_Connection($auth);
+     * $container = $conn->get_container("foo");
+     * $obj = $container->get_object("foo");
+     * $tempurl = $obj->get_temp_url("shared_secret", "expire_time_in_seconds", "{HTTP_METHOD}"); (note: replace {HTTP_METHOD} with the request method: GET, POST, PUT, DELETE, etc.
+     * </code>
+     * @returns The temp url
+     */
+    public function get_temp_url($key, $expires, $method)
+    {
 
+        $expires += time();
+        $url = $this->container->cfs_http->getStorageUrl() .  '/' . $this->container->name . '/' . $this->name;
+        return $url . '?temp_url_sig=' . hash_hmac('sha1', strtoupper($method) .
+               "\n" . $expires . "\n" . parse_url($url, PHP_URL_PATH), $key) .
+               '&temp_url_expires=' . $expires;
+    }
+     /**
+     * Generate hidden input for form post.
+     * @returns array Returns an associative array with form post input.
+     */
+    public function get_form_post_input($key, $expires, $redirect, $max_file_size=5368709120, $max_file_count=1)
+    {
+
+        $expires += time();
+        $url = $this->container->cfs_http->getStorageUrl() .  '/' . $this->container->name . '/' . $this->name;
+        $form_post = array('action' => $url, 'redirect' => $redirect, 'max_file_size' => $max_file_size, 'expires' => $expires, 'file' => $this->name);
+        $form_post['signature'] = hash_hmac('sha1', parse_url($url, PHP_URL_PATH) . "\n" . $redirect . "\n" . $max_file_size  . "\n" . $max_file_count . "\n" . $expires, $key );
+        return $form_post;
+    }
     #private function _re_auth()
     #{
     #    $new_auth = new CF_Authentication(

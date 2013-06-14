@@ -29,7 +29,7 @@ class Cloudfiles extends CI_Controller{
 	
 	public function add_local_file()
 	{
-		$file_location = '/assets/images/';
+		$file_location = 'assets/images/';
 		$file_name = 'logo.jpg';
         
 		$this->cfiles->do_object('a', $file_name, $file_location);
@@ -39,7 +39,7 @@ class Cloudfiles extends CI_Controller{
 	
 	public function add_uploaded_file()
 	{
-		$file_location = '/assets/uploads/';
+		$file_location = 'assets/uploads/';
         
 		$original_name = 'product_image.jpg';
 		$file_name = '5a4794335cd2387a2280f1a1581ea45b.jpg';
@@ -71,7 +71,7 @@ class Cloudfiles extends CI_Controller{
 		$this->cfiles->cf_folder = 'images/';
 		//$this->cfiles->cf_folder = 'as/many/levels/as/you/want/too/';
         
-		$file_location = '/assets/images/';
+		$file_location = 'assets/images/';
 		$file_name = 'logo.jpg';
         
 		$this->cfiles->do_object('a', $file_name, $file_location);
@@ -188,7 +188,7 @@ class Cloudfiles extends CI_Controller{
 	{
 		$cloud_file_name = 'logo.jpg';
 		$local_file_name = 'downloaded_logo.jpg';
-		$file_location = '/assets/images/';
+		$file_location = 'assets/images/';
         
 		$this->cfiles->download_object($cloud_file_name, $local_file_name, $file_location);
         
