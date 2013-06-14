@@ -1,9 +1,6 @@
 Codeigniter Rackspace Cloudfiles
 ================================
-An easy to use library that utilizes the Rackspace Cloudfiles API. 
-
-Mercurial: https://bitbucket.org/modomg/codeigniter-rackspace-cloudfiles
-Git: https://github.com/modomg/codeigniter-rackspace-cloudfiles
+An easy to use library that utilizes the Rackspace Cloudfiles API.
 
 Welcome
 =======
