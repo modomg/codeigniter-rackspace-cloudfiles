@@ -2,17 +2,6 @@ Codeigniter Rackspace Cloudfiles
 ================================
 An easy to use library that utilizes the Rackspace Cloudfiles API.
 
-Welcome
-=======
-
-I made this as an extension to the Rackspace Cloudfiles API along with some changes to it. You can read the original blog post here: http://www.syracusecs.com/rackspace-cloud-files-api-with-codeigniter/.
-
-Right now this is just some basic functions, but I will be actively supporting this and adding things as I go along. If you have any requests or changes, please feel free to leave me a request in the "issues" tab for me.
-
-I've made an easy to follow controller with a number of examples. If you need any other ones, please let me know.
-
--Chris
-
 Installation
 ============
 1. Drop everything into your application folder
