@@ -7,9 +7,10 @@ Installation
 1. Install composer (https://getcomposer.org)
 2. Run via terminal in project directory: composer install
 3. Add the following to the top of your index.php: include_once './vendor/autoload.php';
-4. Drop everything into your application folder
-5. Edit the config file
-6. Go to the controller and start playing around.
+4. Add 'cloudfiles' to your config array in application/config/autoload.php
+5. Drop everything into your application folder
+6. Edit the config file
+7. Go to the controller and start playing around.
 
 If you run into any problems with running it on your localhost or server, please make sure you check out the original Rackspace repo and documentation here: https://github.com/rackspace/php-opencloud
 
