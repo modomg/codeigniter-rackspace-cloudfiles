@@ -41,6 +41,13 @@ class Cloudfiles extends CI_Controller
         die('Your new CDN URL is: ' . $container_url);
     }
 
+    public function delete_container()
+    {
+        $this->rs_cloudfiles->delete_container();
+
+        die('Container Deleted!');
+    }
+
     /**
      * WARNING!!!
      *

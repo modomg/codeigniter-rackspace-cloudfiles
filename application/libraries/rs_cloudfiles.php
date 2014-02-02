@@ -88,6 +88,11 @@ class Rs_cloudfiles
             $this->enable_container_logging();
     }
 
+    public function delete_container($force_delete_files=true)
+    {
+        $this->container->delete($force_delete_files);
+    }
+
     public function enable_container_logging()
     {
         $this->container->enableLogging();
