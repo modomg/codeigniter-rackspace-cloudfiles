@@ -7,8 +7,14 @@ class Cloudfiles extends CI_Controller
     {
         parent::__construct();
 
-        $this->load->library('cf/cfiles');
-        $this->cfiles->cf_container = 'rs_cloud_test'; // this always needs to be set
+        $this->load->library('rs_cloudfiles');
+
+        /**
+         * Alternate Usage/Initialization
+         *
+         * $params = array('rs_location' => 'ORD', 'rs_container' => 'my_other_container');
+         * $this->load->library('rs_cloudfiles', $params);
+         */
     }
 
     public function index()
@@ -18,12 +24,28 @@ class Cloudfiles extends CI_Controller
 
     public function create_container()
     {
-        if ($container_url = $this->cfiles->do_container('a')) {
-            die('Your new CDN URL is: ' . $container_url);
-        } else {
-            die('Sorry, something went wrong!');
-        }
+        /*
+         * Creating a container is done automatically for you, but you can also run it manually with
+         * $this->rs_cloudfiles->create_container();
+         *
+         * Enable CDN
+         * $this->rs_cloudfiles->enable_container_cnd();
+         *
+         * Enable CDN Logging
+         * $this->rs_cloudfiles->enable_container_logging();
+         */
+
+        // Grab the CDN URL
+        $container_url = $this->rs_cloudfiles->get_container_cdn_url();
+
+        die('Your new CDN URL is: ' . $container_url);
     }
+
+    /**
+     * WARNING!!!
+     *
+     * Version 2.0 has not implemented anything below this point...do not use!!!
+     */
 
     public function add_local_file()
     {
@@ -216,13 +238,6 @@ class Cloudfiles extends CI_Controller
         $this->cfiles->do_object('d', $file_name);
 
         $this->_show_errors('Image Deleted!');
-    }
-
-    public function delete_container()
-    {
-        $this->cfiles->do_container('d');
-
-        $this->_show_errors('Container Deleted!');
     }
 
     private function _show_errors($success_msg = 'All Good!')
