@@ -1,4 +1,4 @@
-<?php if (!defined('BASEPATH')) { exit('No direct script access allowed'); }
+<?php
 
 class Cloudfiles extends CI_Controller
 {
@@ -48,13 +48,32 @@ class Cloudfiles extends CI_Controller
         die('Container Deleted!');
     }
 
+    public function add_local_file()
+    {
+        $file_location = 'assets/images/';
+        $file_name = 'logo.jpg';
+
+        $this->rs_cloudfiles->upload_object($file_name, $file_location);
+
+        die('Image Uploaded');
+    }
+
+    public function delete_file()
+    {
+        $file_name = 'logo.jpg';
+
+        $this->rs_cloudfiles->delete_object($file_name);
+
+        die('Image Deleted');
+    }
+
     /**
      * WARNING!!!
      *
      * Version 2.0 has not implemented anything below this point...do not use!!!
      */
 
-    public function add_local_file()
+    /*public function add_local_file()
     {
         $file_location = 'assets/images/';
         $file_name = 'logo.jpg';
@@ -62,7 +81,7 @@ class Cloudfiles extends CI_Controller
         $this->cfiles->do_object('a', $file_name, $file_location);
 
         $this->_show_errors('Image Added!');
-    }
+    }*/
 
     public function add_uploaded_file()
     {
@@ -214,7 +233,7 @@ class Cloudfiles extends CI_Controller
         $this->_show_errors('Image Saved!');
     }
 
-    public function delete_file()
+    /*public function delete_file()
     {
         $file_name = 'logo.jpg';
 
@@ -223,7 +242,7 @@ class Cloudfiles extends CI_Controller
         } else {
             die('Image NOT Deleted!');
         }
-    }
+    }*/
 
     public function delete_fake_files()
     {

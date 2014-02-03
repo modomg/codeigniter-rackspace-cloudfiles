@@ -1,4 +1,4 @@
-<?php if(!defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 /**
  * CodeIgniter - Rackspace Cloudfiles API
  *
@@ -43,8 +43,7 @@ class Rs_cloudfiles
     public function initialize($params = array())
     {
         // Set API preferences from the config file if they are not passed in the $params array
-        foreach (array('rs_username', 'rs_api_key', 'rs_auth_url', 'rs_location', 'rs_container_name') as $key)
-        {
+        foreach (array('rs_username', 'rs_api_key', 'rs_auth_url', 'rs_location', 'rs_container_name') as $key) {
             $this->$key = (isset($params[$key])) ? $params[$key] : config_item($key);
         }
 
@@ -61,13 +60,13 @@ class Rs_cloudfiles
         // see if the container is already made
         $containerList = $this->service->listContainers();
         while ($container = $containerList->next()) {
-            if($container->name == $this->rs_container_name) {
+            if ($container->name == $this->rs_container_name) {
                 $this->container = $this->service->getContainer($this->rs_container_name);
             }
         }
 
         // check if container was set, if not - create it
-        if($this->container === null) {
+        if ($this->container === null) {
             $this->create_container();
         }
     }
@@ -77,18 +76,20 @@ class Rs_cloudfiles
         $this->rs_auth_url = $this->rs_auth_url == 'UK' ? Rackspace::UK_IDENTITY_ENDPOINT : Rackspace::US_IDENTITY_ENDPOINT;
     }
 
-    public function create_container($logs=true, $cdn=true)
+    public function create_container($logs = true, $cdn = true)
     {
         $this->container = $this->service->createContainer($this->rs_container_name);
 
-        if($cdn)
+        if ($cdn) {
             $this->enable_container_cnd();
+        }
 
-        if($logs)
+        if ($logs) {
             $this->enable_container_logging();
+        }
     }
 
-    public function delete_container($force_delete_files=true)
+    public function delete_container($force_delete_files = true)
     {
         $this->container->delete($force_delete_files);
     }
@@ -116,5 +117,22 @@ class Rs_cloudfiles
     public function get_container_cdn_url()
     {
         return $this->container->getCdn()->getCdnUri();
+    }
+
+    public function upload_object($file_name, $file_location, $meta_data = array())
+    {
+        $data = fopen($file_location . $file_name, 'r+');
+
+        $this->container->uploadObject($file_name, $data, $meta_data);
+    }
+
+    public function delete_object($file_name)
+    {
+        try {
+            $object = $this->container->getObject($file_name);
+            $object->delete();
+        } catch (Exception $e) {
+            // do nothing, we don't want an error if we delete something that's not there
+        }
     }
 }
