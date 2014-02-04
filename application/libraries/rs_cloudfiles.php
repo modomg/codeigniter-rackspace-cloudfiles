@@ -14,6 +14,7 @@
  */
 
 use OpenCloud\Rackspace;
+use OpenCloud\ObjectStore\Resource\DataObject;
 
 class Rs_cloudfiles
 {
@@ -22,6 +23,7 @@ class Rs_cloudfiles
     private $client;
     private $service;
     private $container;
+    private $object;
 
     private $rs_username;
     private $rs_api_key;
@@ -119,11 +121,30 @@ class Rs_cloudfiles
         return $this->container->getCdn()->getCdnUri();
     }
 
-    public function upload_object($file_name, $file_location, $meta_data = array())
+    public function upload_object($file_name, $file_location, array $meta_data = array())
     {
         $data = fopen($file_location . $file_name, 'r+');
 
-        $this->container->uploadObject($file_name, $data, $meta_data);
+        $metaHeaders = DataObject::stockHeaders($meta_data);
+
+        $this->container->uploadObject($file_name, $data, $metaHeaders);
+    }
+
+    public function get_object($file_name)
+    {
+        $this->object = $this->container->getObject($file_name);
+    }
+
+    public function set_meta_data($file_name, $meta_data = array())
+    {
+        $this->get_object($file_name);
+        $this->object->saveMetadata($meta_data);
+    }
+
+    public function get_meta_data($file_name)
+    {
+        $this->get_object($file_name);
+        return $this->object->getMetadata();
     }
 
     public function delete_object($file_name)

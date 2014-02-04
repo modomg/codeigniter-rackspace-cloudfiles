@@ -58,6 +58,53 @@ class Cloudfiles extends CI_Controller
         die('Image Uploaded');
     }
 
+    public function add_uploaded_file()
+    {
+        $file_location = 'assets/uploads/';
+
+        $original_name = 'product_image.jpg';
+        $file_name = '5a4794335cd2387a2280f1a1581ea45b.jpg';
+
+        $this->rs_cloudfiles->upload_object($file_name, $file_location, array('original' => $original_name, 'Author' => 'Chris'));
+
+        /**
+         * This is how it would look with the CI upload class
+         *
+         * if($this->upload->do_upload('my_uploaded_file') === false)
+         * {
+         *      //do something with errors
+         * }
+         * else
+         * {
+         *      $data = $this->upload->data();
+         *
+         *      $this->rs_cloudfiles->upload_object($data['file_name'], $file_location, array('original' => $data['orig_name']));
+         *
+         *      //delete local file here
+         * }
+         */
+
+        die('Image Uploaded');
+    }
+
+    public function set_meta()
+    {
+        $file_name = '5a4794335cd2387a2280f1a1581ea45b.jpg';
+
+        $this->rs_cloudfiles->set_meta_data($file_name, array('original' => 'my_file_name.jpg', 'Author' => 'Chris'));
+
+        die('Meta Set');
+    }
+
+    public function get_file_meta()
+    {
+        $file_name = '5a4794335cd2387a2280f1a1581ea45b.jpg';
+
+        $file_info = $this->rs_cloudfiles->get_meta_data($file_name);
+
+        die($file_info->original); // my_file_name.jpg from set_meta()
+    }
+
     public function delete_file()
     {
         $file_name = 'logo.jpg';
@@ -81,7 +128,7 @@ class Cloudfiles extends CI_Controller
         $this->cfiles->do_object('a', $file_name, $file_location);
 
         $this->_show_errors('Image Added!');
-    }*/
+    }
 
     public function add_uploaded_file()
     {
@@ -92,25 +139,8 @@ class Cloudfiles extends CI_Controller
 
         $this->cfiles->do_object('a', $file_name, $file_location, $original_name);
 
-        /**
-         * This is how it would look with the CI upload class
-         *
-         * if($this->upload->do_upload('my_uploaded_file') === false)
-         * {
-         *      //do something with errors
-         * }
-         * else
-         * {
-         *      $data = $this->upload->data();
-         *
-         *      $this->cfiles->do_object('a', $data['file_name'], $file_location, $data['orig_name']);
-         *
-         *      //delete local file here
-         * }
-         */
-
         $this->_show_errors('Image Added!');
-    }
+    }*/
 
     public function add_local_file_folder()
     {
