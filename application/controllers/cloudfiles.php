@@ -114,46 +114,35 @@ class Cloudfiles extends CI_Controller
         die('Image Deleted');
     }
 
+    public function add_local_file_folder()
+    {
+        $this->rs_cloudfiles->virtual_folder = 'images/';
+        //$this->rs_cloudfiles->cf_folder = 'as/many/levels/as/you/want/too/';
+
+        $file_location = 'assets/images/';
+        $file_name = 'logo.jpg';
+
+        $this->rs_cloudfiles->upload_object($file_name, $file_location);
+
+        die('Image Added!');
+    }
+
+    public function delete_file_folder()
+    {
+        $this->rs_cloudfiles->virtual_folder = 'images/';
+
+        $file_name = 'logo.jpg';
+
+        $this->rs_cloudfiles->delete_object($file_name);
+
+        die('Image Deleted!');
+    }
+
     /**
      * WARNING!!!
      *
      * Version 2.0 has not implemented anything below this point...do not use!!!
      */
-
-    /*public function add_local_file()
-    {
-        $file_location = 'assets/images/';
-        $file_name = 'logo.jpg';
-
-        $this->cfiles->do_object('a', $file_name, $file_location);
-
-        $this->_show_errors('Image Added!');
-    }
-
-    public function add_uploaded_file()
-    {
-        $file_location = 'assets/uploads/';
-
-        $original_name = 'product_image.jpg';
-        $file_name = '5a4794335cd2387a2280f1a1581ea45b.jpg';
-
-        $this->cfiles->do_object('a', $file_name, $file_location, $original_name);
-
-        $this->_show_errors('Image Added!');
-    }*/
-
-    public function add_local_file_folder()
-    {
-        $this->cfiles->cf_folder = 'images/';
-        //$this->cfiles->cf_folder = 'as/many/levels/as/you/want/too/';
-
-        $file_location = 'assets/images/';
-        $file_name = 'logo.jpg';
-
-        $this->cfiles->do_object('a', $file_name, $file_location);
-
-        $this->_show_errors('Image Added!');
-    }
 
     public function container_info()
     {
@@ -263,17 +252,6 @@ class Cloudfiles extends CI_Controller
         $this->_show_errors('Image Saved!');
     }
 
-    /*public function delete_file()
-    {
-        $file_name = 'logo.jpg';
-
-        if ($this->cfiles->do_object('d', $file_name)) {
-            die('Image Deleted!');
-        } else {
-            die('Image NOT Deleted!');
-        }
-    }*/
-
     public function delete_fake_files()
     {
         $files = array('bad_reference1.jpg', 'bad_reference2.jpg', 'bad_reference3.jpg');
@@ -283,17 +261,6 @@ class Cloudfiles extends CI_Controller
         }
 
         $this->_show_errors('All files deleted!');
-    }
-
-    public function delete_file_folder()
-    {
-        $this->cfiles->cf_folder = 'images/';
-
-        $file_name = 'logo.jpg';
-
-        $this->cfiles->do_object('d', $file_name);
-
-        $this->_show_errors('Image Deleted!');
     }
 
     private function _show_errors($success_msg = 'All Good!')

@@ -30,6 +30,7 @@ class Rs_cloudfiles
     private $rs_auth_url;
     public $rs_location;
     public $rs_container_name;
+    public $virtual_folder;
 
 
     function __construct($params = array())
@@ -127,17 +128,17 @@ class Rs_cloudfiles
 
         $metaHeaders = DataObject::stockHeaders($meta_data);
 
-        $this->container->uploadObject($file_name, $data, $metaHeaders);
+        $this->container->uploadObject($this->virtual_folder . $file_name, $data, $metaHeaders);
     }
 
     public function get_object($file_name)
     {
-        $this->object = $this->container->getObject($file_name);
+        $this->object = $this->container->getObject($this->virtual_folder . $file_name);
     }
 
     public function set_meta_data($file_name, $meta_data = array())
     {
-        $this->get_object($file_name);
+        $this->get_object($this->virtual_folder . $file_name);
         $this->object->saveMetadata($meta_data);
     }
 
@@ -150,7 +151,7 @@ class Rs_cloudfiles
     public function delete_object($file_name)
     {
         try {
-            $object = $this->container->getObject($file_name);
+            $object = $this->container->getObject($this->virtual_folder . $file_name);
             $object->delete();
         } catch (Exception $e) {
             // do nothing, we don't want an error if we delete something that's not there
