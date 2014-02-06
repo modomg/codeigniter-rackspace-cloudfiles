@@ -133,7 +133,7 @@ class Rs_cloudfiles
 
     public function get_object($file_name)
     {
-        $this->object = $this->container->getObject($this->virtual_folder . $file_name);
+        return $this->object = $this->container->getObject($this->virtual_folder . $file_name);
     }
 
     public function set_meta_data($file_name, $meta_data = array())
@@ -144,8 +144,7 @@ class Rs_cloudfiles
 
     public function get_meta_data($file_name)
     {
-        $this->get_object($file_name);
-        return $this->object->getMetadata();
+        return $this->get_object($file_name)->getMetadata();
     }
 
     public function delete_object($file_name)

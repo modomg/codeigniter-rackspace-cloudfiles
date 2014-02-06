@@ -96,13 +96,34 @@ class Cloudfiles extends CI_Controller
         die('Meta Set');
     }
 
+    public function get_file_info()
+    {
+        $file_name = '5a4794335cd2387a2280f1a1581ea45b.jpg';
+
+        $file_info = $this->rs_cloudfiles->get_object($file_name);
+
+        /**
+         * Available Methods:
+         *
+         * $file_info->getContainer();
+         * $file_info->getName();
+         * $file_info->getContent();
+         * $file_info->getContentLength();
+         * $file_info->getContentType();
+         * $file_info->getEtag();
+         * $file_info->getLastModified();
+         */
+
+        die($file_info->getContentType());
+    }
+
     public function get_file_meta()
     {
         $file_name = '5a4794335cd2387a2280f1a1581ea45b.jpg';
 
-        $file_info = $this->rs_cloudfiles->get_meta_data($file_name);
+        $meta_info = $this->rs_cloudfiles->get_meta_data($file_name);
 
-        die($file_info->original); // my_file_name.jpg from set_meta()
+        die($meta_info->original); // my_file_name.jpg from set_meta()
     }
 
     public function delete_file()
