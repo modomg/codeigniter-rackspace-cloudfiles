@@ -1,6 +1,6 @@
 {
     "require": {
-        "rackspace/php-opencloud": "1.9.1"
+        "rackspace/php-opencloud": "1.9.2"
     },
     "config": {
         "preferred-install": "dist"
