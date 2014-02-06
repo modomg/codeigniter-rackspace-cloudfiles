@@ -117,7 +117,7 @@ class Cloudfiles extends CI_Controller
     public function add_local_file_folder()
     {
         $this->rs_cloudfiles->virtual_folder = 'images/';
-        //$this->rs_cloudfiles->cf_folder = 'as/many/levels/as/you/want/too/';
+        //$this->rs_cloudfiles->virtual_folder = 'as/many/levels/as/you/want/';
 
         $file_location = 'assets/images/';
         $file_name = 'logo.jpg';
