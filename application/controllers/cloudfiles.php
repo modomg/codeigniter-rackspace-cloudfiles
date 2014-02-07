@@ -238,30 +238,6 @@ class Cloudfiles extends CI_Controller
         $this->_show_errors();
     }
 
-    public function get_object()
-    {
-        $file_name = 'logo.jpg';
-
-        if ($object = $this->cfiles->get_object($file_name)) {
-            /**
-             * [name]
-             * [last_modified]
-             * [content_type]
-             * [content_length]
-             * [metadata] => Array
-             * (
-             *      [Original]
-             * )
-             *
-             * metadata will only be available if you originally put it in
-             */
-
-            echo '<p>' . $object->name . ' - ' . $object->content_type . '</p>';
-        }
-
-        $this->_show_errors();
-    }
-
     public function download_object()
     {
         $cloud_file_name = 'logo.jpg';
