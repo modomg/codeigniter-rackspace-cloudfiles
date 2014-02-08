@@ -117,6 +117,11 @@ class Rs_cloudfiles
         $this->container->disableCdn();
     }
 
+    public function get_container()
+    {
+        return $this->container;
+    }
+
     public function get_container_cdn_url()
     {
         return $this->container->getCdn()->getCdnUri();

@@ -159,35 +159,23 @@ class Cloudfiles extends CI_Controller
         die('Image Deleted!');
     }
 
+    public function container_info()
+    {
+        $container = $this->rs_cloudfiles->get_container();
+
+        /**
+         * $container->getObjectCount();
+         * $container->getBytesUsed();
+         */
+
+        die('File Count: ' . $container->getObjectCount());
+    }
+
     /**
      * WARNING!!!
      *
      * Version 2.0 has not implemented anything below this point...do not use!!!
      */
-
-    public function container_info()
-    {
-        if ($container_info = $this->cfiles->container_info()) {
-            /**
-             * [name]
-             * [object_count]
-             * [bytes_used]
-             * [cdn_enabled]
-             * [cdn_uri]
-             * [cdn_ttl]
-             * [cdn_log_retention]
-             * [cdn_acl_user_agent]
-             * [cdn_acl_referrer]
-             */
-
-            echo '<p>' . $container_info->name . '</p>';
-            echo '<p>' . $container_info->cdn_uri . '</p>';
-        } else {
-            die('Container Invalid');
-        }
-
-        $this->_show_errors();
-    }
 
     public function container_objects()
     {
