@@ -143,7 +143,7 @@ class Rs_cloudfiles
 
     public function get_objects()
     {
-        return $this->container->objectList();
+        return $this->container->objectList(array('prefix' => $this->virtual_folder));
     }
 
     public function set_meta_data($file_name, $meta_data = array())

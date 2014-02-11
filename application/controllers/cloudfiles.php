@@ -192,36 +192,33 @@ class Cloudfiles extends CI_Controller
         }
     }
 
+    public function container_objects_folder()
+    {
+        $this->rs_cloudfiles->virtual_folder = 'images/';
+        if ($objects = $this->rs_cloudfiles->get_objects()) {
+            foreach ($objects as $object) {
+
+                /**
+                 * Available Methods:
+                 *
+                 * $object->getContainer();
+                 * $object->getName();
+                 * $object->getContent();
+                 * $object->getContentLength();
+                 * $object->getContentType();
+                 * $object->getEtag();
+                 * $object->getLastModified();
+                 */
+                echo '<p>' . $object->getName() . ' - ' . $object->getContentType() . '</p>';
+            }
+        }
+    }
+
     /**
      * WARNING!!!
      *
      * Version 2.0 has not implemented anything below this point...do not use!!!
      */
-
-    public function container_objects_folder()
-    {
-        $this->cfiles->cf_folder = 'images/';
-        if ($objects = $this->cfiles->get_objects()) {
-            foreach ($objects as $object) {
-                //do something
-                /**
-                 * [name]
-                 * [last_modified]
-                 * [content_type]
-                 * [content_length]
-                 * [metadata] => Array
-                 * (
-                 *      [Original]
-                 * )
-                 *
-                 * metadata will only be available if you originally put it in
-                 */
-                echo '<p>' . $object->name . ' - ' . $object->content_type . '</p>';
-            }
-        }
-
-        $this->_show_errors();
-    }
 
     public function download_object()
     {
