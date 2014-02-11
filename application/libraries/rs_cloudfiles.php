@@ -157,6 +157,21 @@ class Rs_cloudfiles
         return $this->get_object($file_name)->getMetadata();
     }
 
+    public function download_object($file_name, $local_file_name, $local_file_location)
+    {
+        $object = $this->get_object($file_name);
+
+        if (!$fp = @fopen($local_file_location . $local_file_name, 'wb')) {
+            throw new OpenCloud\Common\Exceptions\IOError(sprintf(
+                'Could not open file [%s] for writing',
+                $local_file_location . $local_file_name
+            ));
+        }
+        if (fwrite($fp, $object->getContent()) === false) {
+            throw new Exception('Cannot write to file (' . $local_file_location . $file_name . ')');
+        }
+    }
+
     public function delete_object($file_name)
     {
         try {

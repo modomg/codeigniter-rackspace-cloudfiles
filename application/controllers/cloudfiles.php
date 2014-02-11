@@ -214,22 +214,22 @@ class Cloudfiles extends CI_Controller
         }
     }
 
-    /**
-     * WARNING!!!
-     *
-     * Version 2.0 has not implemented anything below this point...do not use!!!
-     */
-
     public function download_object()
     {
         $cloud_file_name = 'logo.jpg';
         $local_file_name = 'downloaded_logo.jpg';
         $file_location = 'assets/images/';
 
-        $this->cfiles->download_object($cloud_file_name, $local_file_name, $file_location);
+        $this->rs_cloudfiles->download_object($cloud_file_name, $local_file_name, $file_location);
 
-        $this->_show_errors('Image Saved!');
+        die('Image Saved!');
     }
+
+    /**
+     * WARNING!!!
+     *
+     * Version 2.0 has not implemented anything below this point...do not use!!!
+     */
 
     public function delete_fake_files()
     {
