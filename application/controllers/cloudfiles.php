@@ -225,22 +225,22 @@ class Cloudfiles extends CI_Controller
         die('Image Saved!');
     }
 
-    /**
-     * WARNING!!!
-     *
-     * Version 2.0 has not implemented anything below this point...do not use!!!
-     */
-
     public function delete_fake_files()
     {
         $files = array('bad_reference1.jpg', 'bad_reference2.jpg', 'bad_reference3.jpg');
 
         foreach ($files as $file) {
-            $this->cfiles->do_object('d', $file);
+            $this->rs_cloudfiles->delete_object($file);
         }
 
-        $this->_show_errors('All files deleted!');
+        die('All files deleted!');
     }
+
+    /**
+     * WARNING!!!
+     *
+     * Version 2.0 has not implemented anything below this point...do not use!!!
+     */
 
     private function _show_errors($success_msg = 'All Good!')
     {
