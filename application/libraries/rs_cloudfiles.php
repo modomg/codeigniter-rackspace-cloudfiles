@@ -14,6 +14,7 @@
  */
 
 use OpenCloud\Rackspace;
+use OpenCloud\Common\Exceptions\IOError;
 use OpenCloud\ObjectStore\Resource\DataObject;
 
 class Rs_cloudfiles
@@ -162,7 +163,7 @@ class Rs_cloudfiles
         $object = $this->get_object($file_name);
 
         if (!$fp = @fopen($local_file_location . $local_file_name, 'wb')) {
-            throw new OpenCloud\Common\Exceptions\IOError(sprintf(
+            throw new IOError(sprintf(
                 'Could not open file [%s] for writing',
                 $local_file_location . $local_file_name
             ));
