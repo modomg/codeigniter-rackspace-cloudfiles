@@ -38,7 +38,7 @@ class Rs_cloudfiles
     {
         $this->ci = get_instance();
 
-        log_message('debug', 'Rackspace Cloudfiles Class Initialized');
+        log_message('debug', 'Rackspace Cloudfiles: Class Initialized');
 
         $this->initialize($params);
     }
@@ -55,7 +55,7 @@ class Rs_cloudfiles
 
         $this->client = new Rackspace($this->rs_auth_url, array(
             'username' => $this->rs_username,
-            'apiKey' => $this->rs_api_key
+            'apiKey'   => $this->rs_api_key
         ));
 
         // now, connect to the ObjectStore service
@@ -70,7 +70,7 @@ class Rs_cloudfiles
         }
 
         // check if container was set, if not - create it
-        if ($this->container === null) {
+        if (!is_object($this->container)) {
             $this->create_container();
         }
     }
@@ -91,31 +91,43 @@ class Rs_cloudfiles
         if ($logs) {
             $this->enable_container_logging();
         }
+
+        log_message('debug', 'Rackspace Cloudfiles: New container "' . $this->rs_container_name . '" was created');
     }
 
     public function delete_container($force_delete_files = true)
     {
         $this->container->delete($force_delete_files);
+
+        log_message('debug', 'Rackspace Cloudfiles: Container ' . $this->rs_container_name . ' was deleted');
     }
 
     public function enable_container_logging()
     {
         $this->container->enableLogging();
+
+        log_message('debug', 'Rackspace Cloudfiles: Container ' . $this->rs_container_name . ' enabled logging');
     }
 
     public function disable_container_logging()
     {
         $this->container->disableLogging();
+
+        log_message('debug', 'Rackspace Cloudfiles: Container ' . $this->rs_container_name . ' disabled logging');
     }
 
     public function enable_container_cnd()
     {
         $this->container->enableCdn();
+
+        log_message('debug', 'Rackspace Cloudfiles: Container ' . $this->rs_container_name . ' enabled CDN');
     }
 
     public function disable_container_cnd()
     {
         $this->container->disableCdn();
+
+        log_message('debug', 'Rackspace Cloudfiles: Container ' . $this->rs_container_name . ' disabled CDN');
     }
 
     public function get_container()
@@ -135,6 +147,8 @@ class Rs_cloudfiles
         $metaHeaders = DataObject::stockHeaders($meta_data);
 
         $this->container->uploadObject($this->virtual_folder . $file_name, $data, $metaHeaders);
+
+        log_message('debug', 'Rackspace Cloudfiles: File ' . $this->virtual_folder . $file_name . ' was uploaded');
     }
 
     public function get_object($file_name)
@@ -171,6 +185,8 @@ class Rs_cloudfiles
         if (fwrite($fp, $object->getContent()) === false) {
             throw new Exception('Cannot write to file (' . $local_file_location . $file_name . ')');
         }
+
+        log_message('debug', 'Rackspace Cloudfiles: The file ' . $local_file_location . $file_name . ' was downloaded');
     }
 
     public function delete_object($file_name)
@@ -181,5 +197,7 @@ class Rs_cloudfiles
         } catch (Exception $e) {
             // do nothing, we don't want an error if we delete something that's not there
         }
+
+        log_message('debug', 'Rackspace Cloudfiles: The file ' . $this->virtual_folder . $file_name . ' was deleted');
     }
 }
