@@ -235,25 +235,6 @@ class Cloudfiles extends CI_Controller
 
         die('All files deleted!');
     }
-
-    /**
-     * WARNING!!!
-     *
-     * Version 2.0 has not implemented anything below this point...do not use!!!
-     */
-
-    private function _show_errors($success_msg = 'All Good!')
-    {
-        if ($this->cfiles->has_errors()) {
-            echo 'The following errors were found:<ul>';
-            foreach ($this->cfiles->get_errors() as $error) {
-                echo '<li>' . $error . '</li>';
-            }
-            echo '</ul>';
-        } else {
-            die($success_msg);
-        }
-    }
 }
 
 /* End of file cloudfiles.php */
