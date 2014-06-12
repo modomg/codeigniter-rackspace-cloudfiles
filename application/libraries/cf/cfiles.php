@@ -4,31 +4,15 @@ if(!defined('BASEPATH')) exit('No direct script access allowed');
  * CodeIgniter - Rackspace Cloudfiles API
  *
  * Description:
- * This library helps you use the Rackspace Cloudfiles API more efficiently.
+ * An easy to use library (wrapper) that utilizes the Rackspace Open Cloud API (previously cloud files).
  *
- * For installation and usage: https://github.com/modomg/codeigniter-rackspace-cloudfiles
- *
- * @copyright	Copyright (c) 2011 Modo Media Group
- * @version 	1.3
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- **/
+ * @version     2.0
+ * @author      Chris Gmyr <chris@modomediagroup.com>
+ * @license     MIT
+ * @license     http://opensource.org/licenses/mit-license.php
+ * @copyright   2011-2014 Modo Media Group
+ * @link        http://www.modomediagroup.com
+ */
 class Cfiles{
     
     private $CI;                                   // CodeIgniter instance
