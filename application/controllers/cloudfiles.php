@@ -112,6 +112,7 @@ class Cloudfiles extends CI_Controller
          * $file_info->getContentType();
          * $file_info->getEtag();
          * $file_info->getLastModified();
+         * $file_info->getMetadata()->original;
          */
 
         die($file_info->getContentType());
@@ -175,6 +176,8 @@ class Cloudfiles extends CI_Controller
     {
         if ($objects = $this->rs_cloudfiles->get_objects()) {
             foreach ($objects as $object) {
+                // you need to grab the meta data before you can use getMetadata()
+                $object->retrieveMetadata();
 
                 /**
                  * Available Methods:
@@ -186,8 +189,9 @@ class Cloudfiles extends CI_Controller
                  * $object->getContentType();
                  * $object->getEtag();
                  * $object->getLastModified();
+                 * $object->getMetadata()->original;
                  */
-                echo '<p>' . $object->getName() . ' - ' . $object->getContentType() . '</p>';
+                echo '<p>' . $object->getName() . ' - ' . $object->getMetadata()->original . '</p>';
             }
         }
     }
