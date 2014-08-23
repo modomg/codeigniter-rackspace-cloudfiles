@@ -12,7 +12,7 @@ class Cloudfiles extends CI_Controller
         /**
          * Alternate Usage/Initialization
          *
-         * $params = array('rs_location' => 'ORD', 'rs_container' => 'my_other_container');
+         * $params = array('rs_location' => 'ORD', 'rs_container_name' => 'my_other_container');
          * $this->load->library('rs_cloudfiles', $params);
          */
     }
