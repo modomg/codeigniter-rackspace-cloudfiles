@@ -61,16 +61,11 @@ class Rs_cloudfiles
         // now, connect to the ObjectStore service
         $this->service = $this->client->objectStoreService('cloudFiles', $this->rs_location);
 
-        // see if the container is already made
-        $containerList = $this->service->listContainers();
-        while ($container = $containerList->next()) {
-            if ($container->name == $this->rs_container_name) {
-                $this->container = $this->service->getContainer($this->rs_container_name);
-            }
-        }
-
-        // check if container was set, if not - create it
-        if (!is_object($this->container)) {
+        // try to connect to the container
+        try {
+            $this->container = $this->service->getContainer($this->rs_container_name);
+        } catch (Guzzle\Http\Exception\ClientErrorResponseException $e) {
+            // container not found...create it
             $this->create_container();
         }
     }

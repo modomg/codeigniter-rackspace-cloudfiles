@@ -16,6 +16,7 @@ If you run into any problems with running it on your localhost or server, please
 
 Versions
 ========
+* **2.1** - Updated php-opencloud to 1.10.0, made initialize method more efficient when connecting to containers
 * **2.0** - Full rewrite requiring the new Open Cloud API
 * **1.2** - Added exception handling to cfiles.php library and updated the demo controller with new uses. You will still be able to use the functions as they were previously. Also un-commented some sections in the base API library - this means that you will be able to upgrade the base without making any additional changes.
 * **1.1** - Upgraded the base cloud files API along with the demo controller up to CodeIgniter 2.0
