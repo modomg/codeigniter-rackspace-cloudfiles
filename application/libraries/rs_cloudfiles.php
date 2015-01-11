@@ -9,7 +9,7 @@
  * @author      Chris Gmyr <chris@modomediagroup.com>
  * @license     MIT
  * @license     http://opensource.org/licenses/mit-license.php
- * @copyright   2011-2014 Modo Media Group
+ * @copyright   2011-2015 Modo Media Group
  * @link        http://www.modomediagroup.com
  */
 
